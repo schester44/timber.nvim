@@ -77,8 +77,8 @@ function M.query_log_target_containers(lang, range)
         ---@type TSNode
         local log_container = match[utils.get_key_by_value(query.captures, "log_container")]
 
-        -- Breaking changes: https://github.com/neovim/neovim/pull/30193
-        if vim.fn.has("nvim-0.11") == 1 then
+        -- Breaking changes in Neovim >= 0.11: match returns a list of nodes
+        if type(log_container) == "table" and not log_container.range then
           log_container = log_container[1]
         end
 
@@ -116,9 +116,9 @@ function M.query_log_targets(containers)
       for _, match, metadata in query:iter_matches(container.node, bufnr, 0, -1) do
         local log_target = match[utils.get_key_by_value(query.captures, "log_target")]
 
-        -- Breaking changes: https://github.com/neovim/neovim/pull/30193
-        if vim.fn.has("nvim-0.11") == 1 then
-          log_target = log_target ~= nil and log_target[1] or nil
+        -- Breaking changes in Neovim >= 0.11: match returns a list of nodes
+        if log_target ~= nil and type(log_target) == "table" and not log_target.range then
+          log_target = log_target[1]
         end
 
         if log_target then
@@ -211,6 +211,11 @@ function M.setup()
     ---@type TSNode
     local node = match[capture_id]
 
+    -- Breaking changes in Neovim >= 0.11: match returns a list of nodes
+    if type(node) == "table" and not node.range then
+      node = node[1]
+    end
+
     -- Get the adjustment values from the predicate arguments
     local start_adjust = tonumber(predicate[4]) or 0
     local end_adjust = tonumber(predicate[5]) or 0
@@ -243,6 +248,15 @@ function M.setup()
 
     local start_node = match[start_range_id]
     local end_node = match[end_range_id]
+
+    -- Breaking changes in Neovim >= 0.11: match returns a list of nodes
+    if type(start_node) == "table" and not start_node.range then
+      start_node = start_node[1]
+    end
+    if type(end_node) == "table" and not end_node.range then
+      end_node = end_node[1]
+    end
+
     metadata.log_target_range = { start_node, end_node }
   end, { force = true })
 
@@ -250,8 +264,8 @@ function M.setup()
   local get_match_node = function(match, capture_id)
     local node = match[capture_id]
 
-    -- Breaking changes: https://github.com/neovim/neovim/pull/30193
-    if vim.fn.has("nvim-0.11") == 1 then
+    -- Breaking changes in Neovim >= 0.11: match returns a list of nodes
+    if type(node) == "table" and not node.range then
       node = node[1]
     end
 

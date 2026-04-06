@@ -317,7 +317,7 @@ function M.get_lang(filetype)
   local has_lang = function(lang)
     local ok, ret = pcall(vim.treesitter.language.add, lang)
 
-    if vim.fn.has("nvim-0.11") == 1 then
+    if vim.fn.has("nvim-0.11") >= 1 then
       return ok and ret
     end
 
